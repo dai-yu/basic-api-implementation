@@ -136,4 +136,16 @@ class RsListApplicationTests {
                 .andExpect(jsonPath("$[2].type", is("无标签")))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void should_delete_news_by_index() throws Exception {
+        mockMvc.perform(get("/rs/delete?index=3"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].name", is("第一件事")))
+                .andExpect(jsonPath("$[0].type", is("无标签")))
+                .andExpect(jsonPath("$[1].name", is("第二件事")))
+                .andExpect(jsonPath("$[1].type", is("无标签")))
+                .andExpect(status().isOk());
+    }
 }

@@ -47,4 +47,9 @@ public class RsController {
     }
     rsList.set(index-1,news);
   }
+
+  @GetMapping("/rs/delete")
+  public void delete(@RequestParam Integer index){
+    rsList.remove(index-1);
+  }
 }
