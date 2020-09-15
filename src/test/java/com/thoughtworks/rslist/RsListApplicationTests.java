@@ -120,4 +120,20 @@ class RsListApplicationTests {
                 .andExpect(jsonPath("$[2].type", is("无标签")))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void should_modify_a_news_has_type_but_name() throws Exception {
+        News news=new News("","国际");
+        String jsonString=new ObjectMapper().writeValueAsString(news);
+        mockMvc.perform(put("/rs/modify?index=1").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].name", is("第一件事")))
+                .andExpect(jsonPath("$[0].type", is("国际")))
+                .andExpect(jsonPath("$[1].name", is("第二件事")))
+                .andExpect(jsonPath("$[1].type", is("无标签")))
+                .andExpect(jsonPath("$[2].name", is("第三件事")))
+                .andExpect(jsonPath("$[2].type", is("无标签")))
+                .andExpect(status().isOk());
+    }
 }
