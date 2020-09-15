@@ -17,17 +17,11 @@ class RsListApplicationTests {
 
     @Autowired
     MockMvc mockMvc;
-
+    
     @Test
     void contextLoads() throws Exception {
-        mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$",hasSize(3)))
-                .andExpect(jsonPath("$[0].name",is("第一件事")))
-                .andExpect(jsonPath("$[0].type",is("无标签")))
-                .andExpect(jsonPath("$[1].name",is("第二件事")))
-                .andExpect(jsonPath("$[1].type",is("无标签")))
-                .andExpect(jsonPath("$[2].name",is("第三件事")))
-                .andExpect(jsonPath("$[2].type",is("无标签")))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/rs/list")).andExpect(content().string("[第一件事, 第二件事, 第三件事]"))
+        .andExpect(status().isOk());
     }
 
 
