@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class RsListApplicationTests {
+class RsControllerTest {
     MockMvc mockMvc;
 
     @BeforeEach
