@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.domain;
 
 import javax.validation.constraints.*;
+import java.util.Objects;
 
 public class User {
     @NotNull
@@ -27,6 +28,19 @@ public class User {
     }
 
     public User() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return getName().equals(user.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
     }
 
     public String getName() {

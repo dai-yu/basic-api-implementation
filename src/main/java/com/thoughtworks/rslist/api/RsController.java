@@ -2,6 +2,7 @@ package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -24,29 +25,30 @@ public class RsController {
   }
 
   @GetMapping("/rs/list")
-  public List<RsEvent> list(@RequestParam(required = false)Integer start, @RequestParam(required = false)Integer end){
+  public ResponseEntity list(@RequestParam(required = false)Integer start, @RequestParam(required = false)Integer end){
     if(start==null || end==null){
-      return rsList;
+      return ResponseEntity.ok(rsList);
     }
-    return rsList.subList(start-1,end);
+    return ResponseEntity.ok(rsList.subList(start-1,end));
   }
 
 
   @GetMapping("/rs/{index}")
-  public RsEvent oneRsEvent(@PathVariable int index){
-    return rsList.get(index-1);
+  public ResponseEntity oneRsEvent(@PathVariable int index){
+    return ResponseEntity.ok(rsList.get(index-1));
   }
 
   @PostMapping("/rs")
-  public void add(@RequestBody RsEvent rsEvent){
-    if(!userList.contains(rsEvent)){
+  public ResponseEntity add(@RequestBody RsEvent rsEvent){
+    if(!userList.contains(rsEvent.getUser())){
       userList.add(rsEvent.getUser());
     }
     rsList.add(rsEvent);
+    return ResponseEntity.created(null).body(rsList.indexOf(rsEvent));
   }
 
   @PutMapping("/rs/modify")
-  public void modify(@RequestParam Integer index,@RequestBody RsEvent rsEvent){
+  public ResponseEntity modify(@RequestParam Integer index,@RequestBody RsEvent rsEvent){
     if(rsEvent.getName()==""){
       rsEvent.setName(rsList.get(index-1).getName());
     }
@@ -54,15 +56,17 @@ public class RsController {
       rsEvent.setKeyword(rsList.get(index-1).getKeyword());
     }
     rsList.set(index-1, rsEvent);
+    return ResponseEntity.ok(null);
   }
 
   @DeleteMapping("/rs/{index}")
-  public void delete(@PathVariable Integer index){
+  public ResponseEntity delete(@PathVariable Integer index){
     rsList.remove(index-1);
+    return ResponseEntity.ok(null);
   }
 
   @GetMapping("/rs/user")
-  public List<User> getUserList(){
-    return userList;
+  public ResponseEntity getUserList(){
+    return ResponseEntity.ok(userList);
   }
 }
