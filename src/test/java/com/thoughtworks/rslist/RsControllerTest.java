@@ -3,8 +3,10 @@ package com.thoughtworks.rslist;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.api.RsController;
 import com.thoughtworks.rslist.domain.RsEvent;
+import com.thoughtworks.rslist.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest
 @AutoConfigureMockMvc
 class RsControllerTest {
+//    @Autowired
     MockMvc mockMvc;
 
     @BeforeEach
@@ -78,9 +81,10 @@ class RsControllerTest {
 
     @Test
     public void should_add_rsevent() throws Exception {
-        RsEvent rsEvent = new RsEvent("猪肉涨价了", "经济");
+        User user=new User("xiaowang","female",19,"a@thoughtworks.com","18888888888");
+        RsEvent rsEvent = new RsEvent("猪肉涨价了", "经济",user);
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(post("/rs/add").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/rs").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(4)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
@@ -151,6 +155,20 @@ class RsControllerTest {
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
                 .andExpect(jsonPath("$[1].name", is("第二件事")))
                 .andExpect(jsonPath("$[1].keyword", is("无标签")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_determine_whether_user_exists() throws Exception {
+        User user=new User("dave","female",19,"a@thoughtworks.com","18888888888");
+        RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
+        String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
+        mockMvc.perform(post("/rs").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/rs/user"))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].name",is("xiaowang")))
+                .andExpect(jsonPath("$[1].name",is("dave")))
                 .andExpect(status().isOk());
     }
 }

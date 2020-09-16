@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
+import com.thoughtworks.rslist.domain.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -9,12 +10,16 @@ import java.util.List;
 @RestController
 public class RsController {
   private List<RsEvent> rsList = init();
+  private List<User> userList;
 
   private List<RsEvent> init() {
     List<RsEvent> rsList=new ArrayList<>();
-    rsList.add(new RsEvent("第一件事","无标签"));
-    rsList.add(new RsEvent("第二件事","无标签"));
-    rsList.add(new RsEvent("第三件事","无标签"));
+    User user=new User("xiaowang","female",19,"a@thoughtworks.com","18888888888");
+    userList =new ArrayList<>();
+    userList.add(user);
+    rsList.add(new RsEvent("第一件事","无标签",user));
+    rsList.add(new RsEvent("第二件事","无标签",user));
+    rsList.add(new RsEvent("第三件事","无标签",user));
     return rsList;
   }
 
@@ -32,8 +37,11 @@ public class RsController {
     return rsList.get(index-1);
   }
 
-  @PostMapping("/rs/add")
+  @PostMapping("/rs")
   public void add(@RequestBody RsEvent rsEvent){
+    if(!userList.contains(rsEvent)){
+      userList.add(rsEvent.getUser());
+    }
     rsList.add(rsEvent);
   }
 
@@ -51,5 +59,10 @@ public class RsController {
   @DeleteMapping("/rs/{index}")
   public void delete(@PathVariable Integer index){
     rsList.remove(index-1);
+  }
+
+  @GetMapping("/rs/user")
+  public List<User> getUserList(){
+    return userList;
   }
 }
