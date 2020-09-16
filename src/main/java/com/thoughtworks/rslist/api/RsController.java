@@ -5,8 +5,10 @@ import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,8 +45,8 @@ public class RsController {
     return ResponseEntity.ok(rsList.get(index-1));
   }
 
-  @PostMapping("/rs")
-  public ResponseEntity add(@RequestBody RsEvent rsEvent){
+  @PostMapping("/rs/event")
+  public ResponseEntity add(@RequestBody @Valid RsEvent rsEvent){
     if(!userList.contains(rsEvent.getUser())){
       userList.add(rsEvent.getUser());
     }
@@ -75,10 +77,16 @@ public class RsController {
     return ResponseEntity.ok(userList);
   }
 
-  @ExceptionHandler(RsEventNotVaildException.class)
+  @ExceptionHandler({RsEventNotVaildException.class, MethodArgumentNotValidException.class})
   public ResponseEntity rsExceptionHandler(Exception e){
+    String errorMessage;
+    if (e instanceof MethodArgumentNotValidException){
+      errorMessage = "invaild param";
+    }else {
+      errorMessage=e.getMessage();
+    }
     Error error=new Error();
-    error.setError(e.getMessage());
+    error.setError(errorMessage);
     return ResponseEntity.badRequest().body(error);
   }
 }

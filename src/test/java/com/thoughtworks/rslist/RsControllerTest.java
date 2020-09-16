@@ -96,7 +96,7 @@ class RsControllerTest {
         User user=new User("xiaowang","female",19,"a@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("猪肉涨价了", "经济",user);
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(post("/rs").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(4)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
@@ -175,7 +175,7 @@ class RsControllerTest {
         User user=new User("dave","female",19,"a@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(post("/rs").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$",is(3)))
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
@@ -190,7 +190,7 @@ class RsControllerTest {
         User user=new User("xiaowang","male",19,"b@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(post("/rs").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$",is(3)))
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
@@ -206,4 +206,13 @@ class RsControllerTest {
                 .andExpect(jsonPath("$.error",is("invalid index")));
     }
 
+    @Test
+    public void should_throw_method_argument_not_valid_exception() throws Exception {
+        User user=new User("dave","female",15,"a@thoughtworks.com","18888888888");
+        RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
+        String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error",is("invaild param")))
+                .andExpect(status().isBadRequest());
+    }
 }
