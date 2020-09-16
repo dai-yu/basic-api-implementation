@@ -2,11 +2,12 @@ package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
-import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
+import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,9 @@ public class RsController {
     if(start==null || end==null){
       return ResponseEntity.ok(rsList);
     }
+    if (start <1 || end > rsList.size() || start>end){
+      throw new RsEventNotValidParamException("invalid request param");
+    }
     return ResponseEntity.ok(rsList.subList(start-1,end));
   }
 
@@ -43,8 +47,8 @@ public class RsController {
     return ResponseEntity.ok(rsList.get(index-1));
   }
 
-  @PostMapping("/rs")
-  public ResponseEntity add(@RequestBody RsEvent rsEvent){
+  @PostMapping("/rs/event")
+  public ResponseEntity add(@RequestBody @Valid RsEvent rsEvent){
     if(!userList.contains(rsEvent.getUser())){
       userList.add(rsEvent.getUser());
     }
@@ -75,10 +79,4 @@ public class RsController {
     return ResponseEntity.ok(userList);
   }
 
-  @ExceptionHandler(RsEventNotVaildException.class)
-  public ResponseEntity rsExceptionHandler(Exception e){
-    Error error=new Error();
-    error.setError(e.getMessage());
-    return ResponseEntity.badRequest().body(error);
-  }
 }
