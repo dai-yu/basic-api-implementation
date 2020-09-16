@@ -1,14 +1,14 @@
 package com.thoughtworks.rslist.domain;
 
-public class News {
+public class Rseven {
     private String name;
     private String type;
 
-    public News(String name, String type) {
+    public Rseven(String name, String type) {
         this.name = name;
         this.type = type;
     }
-    public News(){
+    public Rseven(){
 
     }
 
