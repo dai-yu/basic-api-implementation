@@ -20,13 +20,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 class RsControllerTest {
-//    @Autowired
+    @Autowired
     MockMvc mockMvc;
 
-    @BeforeEach
-    public void init() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new RsController()).build();
-    }
+//    @BeforeEach
+//    public void init() {
+//        mockMvc = MockMvcBuilders.standaloneSetup(new RsController()).build();
+//    }
 
     @Test
     public void should_get_rsevent_list() throws Exception {
@@ -215,4 +215,12 @@ class RsControllerTest {
                 .andExpect(jsonPath("$.error",is("invaild param")))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void should_throw_rsEvent_not_valid_param_exception() throws Exception {
+        mockMvc.perform(get("/rs/list?start=0&end=10"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error",is("invalid request param")));
+    }
+
 }
