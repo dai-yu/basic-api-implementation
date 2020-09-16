@@ -180,8 +180,8 @@ class RsControllerTest {
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
                 .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].name",is("xiaowang")))
-                .andExpect(jsonPath("$[1].name",is("dave")))
+                .andExpect(jsonPath("$[0].uesr_name",is("xiaowang")))
+                .andExpect(jsonPath("$[1].user_name",is("dave")))
                 .andExpect(status().isOk());
     }
 
@@ -194,8 +194,16 @@ class RsControllerTest {
                 .andExpect(jsonPath("$",is(3)))
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
-                .andExpect(jsonPath("$",hasSize(1)))
-                .andExpect(jsonPath("$[0].name",is("xiaowang")))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].user_name",is("xiaowang")))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void should_throw_rsEvent_not_valid_exception() throws Exception {
+        mockMvc.perform(get("/rs/0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error",is("invalid index")));
+    }
+
 }
