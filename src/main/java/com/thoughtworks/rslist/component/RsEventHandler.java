@@ -3,6 +3,8 @@ package com.thoughtworks.rslist.component;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +22,9 @@ public class RsEventHandler {
         }
         Error error=new Error();
         error.setError(errorMessage);
+
+        Logger logger= LoggerFactory.getLogger(RsEventHandler.class);
+        logger.error(errorMessage);
         return ResponseEntity.badRequest().body(error);
     }
 }

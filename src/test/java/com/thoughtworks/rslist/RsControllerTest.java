@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.api.RsController;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RsControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -29,6 +29,7 @@ class RsControllerTest {
 //    }
 
     @Test
+    @Order(1)
     public void should_get_rsevent_list() throws Exception {
         mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
@@ -44,6 +45,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(2)
     public void should_get_one_rsevent() throws Exception {
         mockMvc.perform(get("/rs/1"))
                 .andExpect(jsonPath("$.name", is("第一件事")))
@@ -60,6 +62,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(3)
     public void should_get_rsevent_between() throws Exception {
         mockMvc.perform(get("/rs/list?start=1&end=2"))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -92,6 +95,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(4)
     public void should_add_rsevent() throws Exception {
         User user=new User("xiaowang","female",19,"a@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("猪肉涨价了", "经济",user);
@@ -111,6 +115,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(5)
     public void should_modify_a_rsevent_has_name_and_keyword() throws Exception {
         RsEvent rsEvent = new RsEvent("新头条", "国际");
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
@@ -127,6 +132,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(6)
     public void should_modify_a_rsevent_has_name_but_keyword() throws Exception {
         RsEvent rsEvent = new RsEvent("新头条", "");
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
@@ -143,6 +149,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(7)
     public void should_modify_a_rsevent_has_keyword_but_name() throws Exception {
         RsEvent rsEvent = new RsEvent("", "国际");
         String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
@@ -159,6 +166,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(8)
     public void should_delete_rsevent_by_index() throws Exception {
         mockMvc.perform(delete("/rs/3"))
                 .andExpect(status().isOk());
@@ -171,6 +179,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(9)
     public void should_determine_user_not_exists() throws Exception {
         User user=new User("dave","female",19,"a@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
@@ -186,6 +195,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(10)
     public void should_determine_user_exists() throws Exception {
         User user=new User("xiaowang","male",19,"b@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
@@ -200,6 +210,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(11)
     public void should_throw_rsEvent_not_valid_exception() throws Exception {
         mockMvc.perform(get("/rs/0"))
                 .andExpect(status().isBadRequest())
@@ -207,6 +218,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(12)
     public void should_throw_method_argument_not_valid_exception() throws Exception {
         User user=new User("dave","female",15,"a@thoughtworks.com","18888888888");
         RsEvent rsEvent = new RsEvent("dave的热搜", "民生",user);
@@ -217,6 +229,7 @@ class RsControllerTest {
     }
 
     @Test
+    @Order(13)
     public void should_throw_rsEvent_not_valid_param_exception() throws Exception {
         mockMvc.perform(get("/rs/list?start=0&end=10"))
                 .andExpect(status().isBadRequest())
