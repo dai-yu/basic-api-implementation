@@ -13,10 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,10 +33,13 @@ class RsControllerTest {
         mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
+                .andExpect(jsonPath("$[0]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[1].name", is("第二件事")))
                 .andExpect(jsonPath("$[1].keyword", is("无标签")))
+                .andExpect(jsonPath("$[1]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[2].name", is("第三件事")))
                 .andExpect(jsonPath("$[2].keyword", is("无标签")))
+                .andExpect(jsonPath("$[2]",not(hasKey("user"))))
                 .andExpect(status().isOk());
     }
 
@@ -45,13 +47,16 @@ class RsControllerTest {
     public void should_get_one_rsevent() throws Exception {
         mockMvc.perform(get("/rs/1"))
                 .andExpect(jsonPath("$.name", is("第一件事")))
-                .andExpect(jsonPath("$.keyword", is("无标签")));
+                .andExpect(jsonPath("$.keyword", is("无标签")))
+                .andExpect(jsonPath("$",not(hasKey("user"))));
         mockMvc.perform(get("/rs/2"))
                 .andExpect(jsonPath("$.name", is("第二件事")))
-                .andExpect(jsonPath("$.keyword", is("无标签")));
+                .andExpect(jsonPath("$.keyword", is("无标签")))
+                .andExpect(jsonPath("$",not(hasKey("user"))));
         mockMvc.perform(get("/rs/3"))
                 .andExpect(jsonPath("$.name", is("第三件事")))
-                .andExpect(jsonPath("$.keyword", is("无标签")));
+                .andExpect(jsonPath("$.keyword", is("无标签")))
+                .andExpect(jsonPath("$",not(hasKey("user"))));
     }
 
     @Test
@@ -60,22 +65,29 @@ class RsControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
+                .andExpect(jsonPath("$[0]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[1].name", is("第二件事")))
-                .andExpect(jsonPath("$[1].keyword", is("无标签")));
+                .andExpect(jsonPath("$[1].keyword", is("无标签")))
+                .andExpect(jsonPath("$[1]",not(hasKey("user"))));
         mockMvc.perform(get("/rs/list?start=2&end=3"))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].name", is("第二件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
+                .andExpect(jsonPath("$[0]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[1].name", is("第三件事")))
-                .andExpect(jsonPath("$[1].keyword", is("无标签")));
+                .andExpect(jsonPath("$[1].keyword", is("无标签")))
+                .andExpect(jsonPath("$[1]",not(hasKey("user"))));
         mockMvc.perform(get("/rs/list?start=1&end=3"))
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].name", is("第一件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
+                .andExpect(jsonPath("$[0]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[1].name", is("第二件事")))
                 .andExpect(jsonPath("$[1].keyword", is("无标签")))
+                .andExpect(jsonPath("$[1]",not(hasKey("user"))))
                 .andExpect(jsonPath("$[2].name", is("第三件事")))
-                .andExpect(jsonPath("$[2].keyword", is("无标签")));
+                .andExpect(jsonPath("$[2].keyword", is("无标签")))
+                .andExpect(jsonPath("$[2]",not(hasKey("user"))));
 
     }
 
