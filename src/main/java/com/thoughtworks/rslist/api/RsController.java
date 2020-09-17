@@ -70,11 +70,16 @@ public class RsController {
 
   @PatchMapping("/rs/{rsEventId}")
   public ResponseEntity modify(@PathVariable Integer rsEventId,@RequestBody RsEvent rsEvent){
-    RsEventPO rsEventPO = RsEventPO.builder().eventName(rsEvent.getEventName()).keyWord(rsEvent.getKeyword())
-            .userPO(UserPO.builder().id(rsEvent.getUserId()).build()).id(rsEventId).build();
-    if (rsEvent.getUserId()!=rsEventRepository.findById(rsEventId).get().getUserPO().getId()){
+    Optional<RsEventPO> rsEventPOExit = rsEventRepository.findById(rsEventId);
+    if (rsEvent.getUserId()!=rsEventPOExit.get().getUserPO().getId() || !rsEventPOExit.isPresent()){
       return ResponseEntity.badRequest().build();
     }
+    RsEventPO rsEventPO = RsEventPO.builder()
+            .eventName(rsEvent.getEventName()!=null?rsEvent.getEventName():rsEventPOExit.get().getEventName())
+            .keyWord(rsEvent.getKeyword()!=null?rsEvent.getKeyword():rsEventPOExit.get().getKeyWord())
+            .userPO(UserPO.builder().id(rsEvent.getUserId()).build())
+            .id(rsEventId)
+            .build();
     rsEventRepository.save(rsEventPO);
     return ResponseEntity.ok(null);
   }
