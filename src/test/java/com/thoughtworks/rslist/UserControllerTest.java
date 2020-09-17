@@ -16,8 +16,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -119,5 +118,18 @@ public class UserControllerTest {
         mockMvc.perform(get("/user/"+all.get(0).getId()))
                 .andExpect(jsonPath("$.name",is("dave")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(9)
+    public void should_delete_user_by_id() throws Exception {
+        User user=new User("dave","male",22,"abc@123.com","18888888888");
+        String jsonString=new ObjectMapper().writeValueAsString(user);
+        mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        List<UserPO> all = userRepository.findAll();
+        mockMvc.perform(delete("/user/"+all.get(0).getId()))
+                .andExpect(status().isOk());
+        assertEquals(false,userRepository.findById(all.get(0).getId()).isPresent());
     }
 }
