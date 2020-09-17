@@ -72,6 +72,9 @@ public class RsController {
   public ResponseEntity modify(@PathVariable Integer rsEventId,@RequestBody RsEvent rsEvent){
     RsEventPO rsEventPO = RsEventPO.builder().eventName(rsEvent.getEventName()).keyWord(rsEvent.getKeyword())
             .userPO(UserPO.builder().id(rsEvent.getUserId()).build()).id(rsEventId).build();
+    if (rsEvent.getUserId()!=rsEventRepository.findById(rsEventId).get().getUserPO().getId()){
+      return ResponseEntity.badRequest().build();
+    }
     rsEventRepository.save(rsEventPO);
     return ResponseEntity.ok(null);
   }

@@ -281,4 +281,19 @@ class RsControllerTest {
         assertEquals("新的关键词", rsEventRepository.findAll().get(0).getKeyWord());
         assertEquals(userId, rsEventRepository.findAll().get(0).getUserPO().getId());
     }
+
+    @Test
+    @Order(16)
+    public void should_bad_request_when_userId_and_rsEventId_mismatch() throws Exception{
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        int userId = userRepository.findAll().get(0).getId();
+        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
+        rsEventRepository.save(eventPO);
+        int rsEventId = rsEventRepository.findAll().get(0).getId();
+        String jsonString = "{\"eventName\":\"新的热搜\",\"keyword\":\"新的关键词\",\"userId\":" + userId+1 + "}";
+        mockMvc.perform(patch("/rs/" + rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
 }
