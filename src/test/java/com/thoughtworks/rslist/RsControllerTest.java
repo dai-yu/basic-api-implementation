@@ -237,5 +237,13 @@ class RsControllerTest {
                 .andExpect(jsonPath("$.error",is("invalid request param")));
     }
 
+    @Test
+    @Order(14)
+    public void should_BadRequest_when_user_not_exist() throws Exception {
+        String jsonString="{\"eventName\":\"猪肉涨价了\",\"keyword\":\"经济\",\"userId\":100}";
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
 
 }

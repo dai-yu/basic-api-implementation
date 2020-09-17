@@ -6,6 +6,7 @@ import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import com.thoughtworks.rslist.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,10 @@ public class RsController {
 
   @Autowired
   RsEventRepository rsEventRepository;
+
+  @Autowired
+  UserRepository userRepository;
+
   private List<RsEvent> rsList = init();
 
   private List<RsEvent> init() {
@@ -51,6 +56,9 @@ public class RsController {
 
   @PostMapping("/rs/event")
   public ResponseEntity add(@RequestBody @Valid RsEvent rsEvent){
+    if (!userRepository.findById(rsEvent.getUserId()).isPresent()){
+      return ResponseEntity.badRequest().build();
+    }
     RsEventPO rsEventPO=RsEventPO.builder().eventName(rsEvent.getEventName()).keyWord(rsEvent.getKeyword()).userId(rsEvent.getUserId()).build();
     rsEventRepository.save(rsEventPO);
     return ResponseEntity.created(null).build();
