@@ -1,15 +1,17 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
-import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
+import com.thoughtworks.rslist.po.VotePO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
+import com.thoughtworks.rslist.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,6 +27,9 @@ public class RsController {
 
   @Autowired
   UserRepository userRepository;
+
+  @Autowired
+  VoteRepository voteRepository;
 
   private List<RsEvent> rsList = init();
 
@@ -69,6 +74,7 @@ public class RsController {
   }
 
   @PatchMapping("/rs/{rsEventId}")
+  @Transactional
   public ResponseEntity modify(@PathVariable Integer rsEventId,@RequestBody RsEvent rsEvent){
     Optional<RsEventPO> rsEventPOExit = rsEventRepository.findById(rsEventId);
     if (rsEvent.getUserId()!=rsEventPOExit.get().getUserPO().getId() || !rsEventPOExit.isPresent()){
@@ -96,4 +102,12 @@ public class RsController {
     return ResponseEntity.ok(all);
   }
 
+  @PostMapping("/rs/vote/{rsEventId}")
+  @Transactional
+  public void voteByRsEventId(@PathVariable int rsEventId, @RequestBody VotePO votePO){
+    RsEventPO rsEventPO = rsEventRepository.findById(rsEventId).get();
+    rsEventPO.setVote(rsEventPO.getVote()+votePO.getVoteNum());
+    rsEventRepository.save(rsEventPO);
+    voteRepository.save(votePO);
+  }
 }

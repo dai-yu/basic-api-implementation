@@ -19,6 +19,7 @@ public class RsEventPO {
     private int id;
     private String eventName;
     private String keyWord;
+    private int vote;
     @ManyToOne
     private UserPO userPO;
 }
