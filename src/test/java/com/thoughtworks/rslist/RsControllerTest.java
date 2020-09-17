@@ -357,4 +357,19 @@ class RsControllerTest {
         assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
     }
 
+    @Test
+    @Order(19)
+    public void shoud_bad_request_when_vote_uncorrectly() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        int userId = userRepository.findAll().get(0).getId();
+        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
+        rsEventRepository.save(eventPO);
+        int rsEventId = rsEventRepository.findAll().get(0).getId();
+        VotePO votePO=VotePO.builder().voteNum(20).userId(userId).voteTime(new Date(System.currentTimeMillis())).build();
+        String jsonString = new ObjectMapper().writeValueAsString(votePO);
+        mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
 }

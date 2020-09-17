@@ -104,10 +104,15 @@ public class RsController {
 
   @PostMapping("/rs/vote/{rsEventId}")
   @Transactional
-  public void voteByRsEventId(@PathVariable int rsEventId, @RequestBody VotePO votePO){
+  public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody VotePO votePO){
     RsEventPO rsEventPO = rsEventRepository.findById(rsEventId).get();
+    Optional<UserPO> userPOOptional = userRepository.findById(votePO.getUserId());
+    if (!userPOOptional.isPresent() || userPOOptional.get().getVoteNum()<votePO.getVoteNum()){
+      return ResponseEntity.badRequest().build();
+    }
     rsEventPO.setVote(rsEventPO.getVote()+votePO.getVoteNum());
     rsEventRepository.save(rsEventPO);
     voteRepository.save(votePO);
+    return ResponseEntity.ok().build();
   }
 }
