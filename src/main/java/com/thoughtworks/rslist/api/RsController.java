@@ -68,15 +68,11 @@ public class RsController {
     return ResponseEntity.created(null).build();
   }
 
-  @PutMapping("/rs/modify")
-  public ResponseEntity modify(@RequestParam Integer index,@RequestBody RsEvent rsEvent){
-    if(rsEvent.getEventName()==""){
-      rsEvent.setEventName(rsList.get(index-1).getEventName());
-    }
-    if(rsEvent.getKeyword()==""){
-      rsEvent.setKeyword(rsList.get(index-1).getKeyword());
-    }
-    rsList.set(index-1, rsEvent);
+  @PatchMapping("/rs/{rsEventId}")
+  public ResponseEntity modify(@PathVariable Integer rsEventId,@RequestBody RsEvent rsEvent){
+    RsEventPO rsEventPO = RsEventPO.builder().eventName(rsEvent.getEventName()).keyWord(rsEvent.getKeyword())
+            .userPO(UserPO.builder().id(rsEvent.getUserId()).build()).id(rsEventId).build();
+    rsEventRepository.save(rsEventPO);
     return ResponseEntity.ok(null);
   }
 
