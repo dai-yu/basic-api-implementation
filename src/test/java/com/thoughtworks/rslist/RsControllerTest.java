@@ -189,7 +189,7 @@ class RsControllerTest {
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
                 .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].uesr_name",is("xiaowang")))
+                .andExpect(jsonPath("$[0].user_name",is("xiaowang")))
                 .andExpect(jsonPath("$[1].user_name",is("dave")))
                 .andExpect(status().isOk());
     }
@@ -204,7 +204,7 @@ class RsControllerTest {
                 .andExpect(jsonPath("$",is(3)))
                 .andExpect(status().isCreated());
         mockMvc.perform(get("/rs/user"))
-                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$",hasSize(1)))
                 .andExpect(jsonPath("$[0].user_name",is("xiaowang")))
                 .andExpect(status().isOk());
     }
