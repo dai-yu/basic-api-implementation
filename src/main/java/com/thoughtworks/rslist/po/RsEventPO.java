@@ -1,6 +1,5 @@
 package com.thoughtworks.rslist.po;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,19 +11,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="user")
 @Data
+@Table(name = "rsEvent")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPO {
+public class RsEventPO {
     @Id
     @GeneratedValue
     private int id;
-    private String name;
-    private String gender;
-    private int age;
-    private String email;
-    private String phone;
-    private int voteNum=10;
+    private String eventName;
+    private String keyWord;
+    private int userId;
 }

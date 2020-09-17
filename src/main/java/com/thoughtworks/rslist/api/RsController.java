@@ -4,6 +4,9 @@ import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
+import com.thoughtworks.rslist.po.RsEventPO;
+import com.thoughtworks.rslist.repository.RsEventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,17 +16,16 @@ import java.util.List;
 
 @RestController
 public class RsController {
+
+  @Autowired
+  RsEventRepository rsEventRepository;
   private List<RsEvent> rsList = init();
-  private List<User> userList;
 
   private List<RsEvent> init() {
     List<RsEvent> rsList=new ArrayList<>();
-    User user=new User("xiaowang","female",19,"a@thoughtworks.com","18888888888");
-    userList =new ArrayList<>();
-    userList.add(user);
-    rsList.add(new RsEvent("第一件事","无标签",user));
-    rsList.add(new RsEvent("第二件事","无标签",user));
-    rsList.add(new RsEvent("第三件事","无标签",user));
+    rsList.add(new RsEvent("第一件事","无标签",1));
+    rsList.add(new RsEvent("第二件事","无标签",2));
+    rsList.add(new RsEvent("第三件事","无标签",3));
     return rsList;
   }
 
@@ -49,17 +51,15 @@ public class RsController {
 
   @PostMapping("/rs/event")
   public ResponseEntity add(@RequestBody @Valid RsEvent rsEvent){
-    if(!userList.contains(rsEvent.getUser())){
-      userList.add(rsEvent.getUser());
-    }
-    rsList.add(rsEvent);
-    return ResponseEntity.created(null).body(rsList.indexOf(rsEvent));
+    RsEventPO rsEventPO=RsEventPO.builder().eventName(rsEvent.getEventName()).keyWord(rsEvent.getKeyword()).userId(rsEvent.getUserId()).build();
+    rsEventRepository.save(rsEventPO);
+    return ResponseEntity.created(null).build();
   }
 
   @PutMapping("/rs/modify")
   public ResponseEntity modify(@RequestParam Integer index,@RequestBody RsEvent rsEvent){
-    if(rsEvent.getName()==""){
-      rsEvent.setName(rsList.get(index-1).getName());
+    if(rsEvent.getEventName()==""){
+      rsEvent.setEventName(rsList.get(index-1).getEventName());
     }
     if(rsEvent.getKeyword()==""){
       rsEvent.setKeyword(rsList.get(index-1).getKeyword());
@@ -76,7 +76,8 @@ public class RsController {
 
   @GetMapping("/rs/user")
   public ResponseEntity getUserList(){
-    return ResponseEntity.ok(userList);
+    List<RsEventPO> all = rsEventRepository.findAll();
+    return ResponseEntity.ok(all);
   }
 
 }
