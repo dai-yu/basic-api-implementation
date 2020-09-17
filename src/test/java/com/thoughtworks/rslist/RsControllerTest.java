@@ -7,6 +7,7 @@ import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import com.thoughtworks.rslist.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,9 +34,13 @@ class RsControllerTest {
     @Autowired
     RsEventRepository rsEventRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     @AfterEach
     public void clear(){
         rsEventRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -245,5 +250,18 @@ class RsControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @Order(15)
+    public void should_delete_user() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
+        rsEventRepository.save(eventPO);
+        mockMvc.perform(delete("/user/{id}",userPO.getId()))
+                .andExpect(status().isOk());
+        assertEquals(0,userRepository.findAll().size());
+        assertEquals(0,rsEventRepository.findAll().size());
+    }
 
 }

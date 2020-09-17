@@ -3,9 +3,11 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.po.UserPO;
+import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,9 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RsEventRepository rsEventRepository;
 
     List<User> userList=new ArrayList<>();
 
@@ -52,6 +57,7 @@ public class UserController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @Transactional
     public ResponseEntity userExceptionHandler(Exception e){
         Error error=new Error();
         error.setError("invalid user");
