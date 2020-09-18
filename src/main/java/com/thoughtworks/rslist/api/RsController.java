@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.exception.RsEventNotVaildException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
 import com.thoughtworks.rslist.po.RsEventPO;
@@ -10,6 +11,8 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +21,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class RsController {
@@ -31,34 +35,35 @@ public class RsController {
   @Autowired
   VoteRepository voteRepository;
 
-  private List<RsEvent> rsList = init();
-
-  private List<RsEvent> init() {
-    List<RsEvent> rsList=new ArrayList<>();
-    rsList.add(new RsEvent("第一件事","无标签",1));
-    rsList.add(new RsEvent("第二件事","无标签",2));
-    rsList.add(new RsEvent("第三件事","无标签",3));
-    return rsList;
-  }
 
   @GetMapping("/rs/list")
   public ResponseEntity list(@RequestParam(required = false)Integer start, @RequestParam(required = false)Integer end){
     if(start==null || end==null){
-      return ResponseEntity.ok(rsList);
+      List<RsEvent> all = rsEventRepository.findAll().stream().map(rsEventPO -> RsEvent.builder()
+              .eventName(rsEventPO.getEventName())
+              .keyword(rsEventPO.getKeyWord())
+              .userId(rsEventPO.getUserPO().getId()).build()).collect(Collectors.toList());
+
+      return ResponseEntity.ok(all);
     }
-    if (start <1 || end > rsList.size() || start>end){
+    if (start <1 || end > rsEventRepository.count() || start>end){
       throw new RsEventNotValidParamException("invalid request param");
     }
-    return ResponseEntity.ok(rsList.subList(start-1,end));
+    List<RsEvent> all = rsEventRepository.findLimit(start-1,end).stream().map(rsEventPO -> RsEvent.builder()
+            .eventName(rsEventPO.getEventName())
+            .keyword(rsEventPO.getKeyWord())
+            .userId(rsEventPO.getUserPO().getId()).build()).collect(Collectors.toList());
+    return ResponseEntity.ok(all);
   }
 
 
   @GetMapping("/rs/{index}")
   public ResponseEntity oneRsEvent(@PathVariable int index){
-    if (index<=0 || index>rsList.size()){
-      throw new RsEventNotVaildException("invalid index");
-    }
-    return ResponseEntity.ok(rsList.get(index-1));
+//    if (index<=0 || index>rsList.size()){
+//      throw new RsEventNotVaildException("invalid index");
+//    }
+//    return ResponseEntity.ok(rsList.get(index-1));
+    return ResponseEntity.ok(null);
   }
 
   @PostMapping("/rs/event")
@@ -92,7 +97,7 @@ public class RsController {
 
   @DeleteMapping("/rs/{index}")
   public ResponseEntity delete(@PathVariable Integer index){
-    rsList.remove(index-1);
+//    rsList.remove(index-1);
     return ResponseEntity.ok(null);
   }
 
@@ -104,14 +109,18 @@ public class RsController {
 
   @PostMapping("/rs/vote/{rsEventId}")
   @Transactional
-  public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody VotePO votePO){
-    RsEventPO rsEventPO = rsEventRepository.findById(rsEventId).get();
-    Optional<UserPO> userPOOptional = userRepository.findById(votePO.getUserPO().getId());
-    if (!userPOOptional.isPresent() || userPOOptional.get().getVoteNum()<votePO.getVoteNum()){
+  public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody Vote vote){
+    Optional<RsEventPO> rsEventPOOptional = rsEventRepository.findById(rsEventId);
+    Optional<UserPO> userPOOptional = userRepository.findById(vote.getUserId());
+    VotePO votePO = VotePO.builder()
+            .rsEventId(vote.getRsEventId()).userPO(userPOOptional.get()).voteNum(vote.getVoteNum()).build();
+    if (!userPOOptional.isPresent() ||
+            !rsEventPOOptional.isPresent() ||
+            userPOOptional.get().getVoteNum()<vote.getVoteNum()){
       return ResponseEntity.badRequest().build();
     }
-    rsEventPO.setVote(rsEventPO.getVote()+votePO.getVoteNum());
-    rsEventRepository.save(rsEventPO);
+    rsEventPOOptional.get().setVote(rsEventPOOptional.get().getVote()+vote.getVoteNum());
+    rsEventRepository.save(rsEventPOOptional.get());
     voteRepository.save(votePO);
     return ResponseEntity.ok().build();
   }

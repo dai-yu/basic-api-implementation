@@ -2,9 +2,9 @@ package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.RsEvent;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
-import com.thoughtworks.rslist.po.VotePO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
@@ -50,16 +50,21 @@ class RsControllerTest {
     @Test
     @Order(1)
     public void should_get_rsevent_list() throws Exception {
-        mockMvc.perform(get("/rs/list")).andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[0].name", is("第一件事")))
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        for (int i=1;i<4;i++){
+            RsEventPO rsEventPO = RsEventPO.builder().eventName("第" + i + "件事").keyWord("无标签").userPO(userPO).build();
+            rsEventRepository.save(rsEventPO);
+        }
+        mockMvc.perform(get("/rs/list"))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].eventName", is("第1件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
-                .andExpect(jsonPath("$[0]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[1].name", is("第二件事")))
+                .andExpect(jsonPath("$[1].eventName", is("第2件事")))
                 .andExpect(jsonPath("$[1].keyword", is("无标签")))
-                .andExpect(jsonPath("$[1]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[2].name", is("第三件事")))
+                .andExpect(jsonPath("$[2].eventName", is("第3件事")))
                 .andExpect(jsonPath("$[2].keyword", is("无标签")))
-                .andExpect(jsonPath("$[2]", not(hasKey("user"))))
                 .andExpect(status().isOk());
     }
 
@@ -83,33 +88,33 @@ class RsControllerTest {
     @Test
     @Order(3)
     public void should_get_rsevent_between() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        for (int i=1;i<4;i++){
+            RsEventPO rsEventPO = RsEventPO.builder().eventName("第" + i + "件事").keyWord("无标签").userPO(userPO).build();
+            rsEventRepository.save(rsEventPO);
+        }
         mockMvc.perform(get("/rs/list?start=1&end=2"))
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name", is("第一件事")))
+                .andExpect(jsonPath("$[0].eventName", is("第1件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
-                .andExpect(jsonPath("$[0]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[1].name", is("第二件事")))
-                .andExpect(jsonPath("$[1].keyword", is("无标签")))
-                .andExpect(jsonPath("$[1]", not(hasKey("user"))));
+                .andExpect(jsonPath("$[1].eventName", is("第2件事")))
+                .andExpect(jsonPath("$[1].keyword", is("无标签")));
         mockMvc.perform(get("/rs/list?start=2&end=3"))
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name", is("第二件事")))
+                .andExpect(jsonPath("$[0].eventName", is("第2件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
-                .andExpect(jsonPath("$[0]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[1].name", is("第三件事")))
-                .andExpect(jsonPath("$[1].keyword", is("无标签")))
-                .andExpect(jsonPath("$[1]", not(hasKey("user"))));
+                .andExpect(jsonPath("$[1].eventName", is("第3件事")))
+                .andExpect(jsonPath("$[1].keyword", is("无标签")));
         mockMvc.perform(get("/rs/list?start=1&end=3"))
                 .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[0].name", is("第一件事")))
+                .andExpect(jsonPath("$[0].eventName", is("第1件事")))
                 .andExpect(jsonPath("$[0].keyword", is("无标签")))
-                .andExpect(jsonPath("$[0]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[1].name", is("第二件事")))
+                .andExpect(jsonPath("$[1].eventName", is("第2件事")))
                 .andExpect(jsonPath("$[1].keyword", is("无标签")))
-                .andExpect(jsonPath("$[1]", not(hasKey("user"))))
-                .andExpect(jsonPath("$[2].name", is("第三件事")))
-                .andExpect(jsonPath("$[2].keyword", is("无标签")))
-                .andExpect(jsonPath("$[2]", not(hasKey("user"))));
+                .andExpect(jsonPath("$[2].eventName", is("第3件事")))
+                .andExpect(jsonPath("$[2].keyword", is("无标签")));
 
     }
 
@@ -278,6 +283,7 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
+
         String jsonString = "{\"eventName\":\"新的热搜\",\"keyword\":\"新的关键词\",\"userId\":" + userId + "}";
         mockMvc.perform(patch("/rs/" + rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -346,8 +352,8 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        VotePO votePO=VotePO.builder().voteNum(5).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(votePO);
+        Vote vote=Vote.builder().voteNum(5).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
@@ -364,8 +370,8 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        VotePO votePO=VotePO.builder().voteNum(20).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(votePO);
+        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

@@ -1,5 +1,8 @@
 package com.thoughtworks.rslist.domain;
 
+import lombok.Builder;
+
+@Builder
 public class RsEvent {
     private String eventName;
     private String keyword;
