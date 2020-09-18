@@ -106,7 +106,7 @@ public class RsController {
   @Transactional
   public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody VotePO votePO){
     RsEventPO rsEventPO = rsEventRepository.findById(rsEventId).get();
-    Optional<UserPO> userPOOptional = userRepository.findById(votePO.getUserId());
+    Optional<UserPO> userPOOptional = userRepository.findById(votePO.getUserPO().getId());
     if (!userPOOptional.isPresent() || userPOOptional.get().getVoteNum()<votePO.getVoteNum()){
       return ResponseEntity.badRequest().build();
     }

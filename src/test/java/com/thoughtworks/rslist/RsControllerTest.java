@@ -1,9 +1,7 @@
 package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thoughtworks.rslist.api.RsController;
 import com.thoughtworks.rslist.domain.RsEvent;
-import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
 import com.thoughtworks.rslist.po.VotePO;
@@ -16,10 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -48,6 +44,7 @@ class RsControllerTest {
     public void clear() {
         rsEventRepository.deleteAll();
         userRepository.deleteAll();
+        voteRepository.deleteAll();
     }
 
     @Test
@@ -259,7 +256,7 @@ class RsControllerTest {
 
     @Test
     @Order(15)
-    public void should_delete_user() throws Exception {
+    public void should_delete_user_and_users_all_rsEvent() throws Exception {
         UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
                 .age(22).gender("male").email("abc@123.com").build();
         userRepository.save(userPO);
@@ -342,34 +339,35 @@ class RsControllerTest {
 
     @Test
     @Order(19)
-    public void shoud_vote_correctly() throws Exception {
+    public void should_vote_correctly() throws Exception {
         UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
                 .age(22).gender("male").email("abc@123.com").build();
         userRepository.save(userPO);
-        int userId = userRepository.findAll().get(0).getId();
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        VotePO votePO=VotePO.builder().voteNum(5).userId(userId).voteTime(new Date(System.currentTimeMillis())).build();
+        VotePO votePO=VotePO.builder().voteNum(5).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
         String jsonString = new ObjectMapper().writeValueAsString(votePO);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
+        assertEquals(5,voteRepository.findAll().get(0).getVoteNum());
+        assertEquals(userPO.getId(),voteRepository.findAll().get(0).getUserPO().getId());
     }
 
     @Test
     @Order(19)
-    public void shoud_bad_request_when_vote_uncorrectly() throws Exception {
+    public void should_bad_request_when_vote_uncorrectly() throws Exception {
         UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
                 .age(22).gender("male").email("abc@123.com").build();
         userRepository.save(userPO);
-        int userId = userRepository.findAll().get(0).getId();
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        VotePO votePO=VotePO.builder().voteNum(20).userId(userId).voteTime(new Date(System.currentTimeMillis())).build();
+        VotePO votePO=VotePO.builder().voteNum(20).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
         String jsonString = new ObjectMapper().writeValueAsString(votePO);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
 }

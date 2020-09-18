@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.*;
 import java.sql.Date;
 
 @Data
@@ -21,11 +18,13 @@ public class VotePO {
     @GeneratedValue
     private int id;
 
-    @JoinColumn
-    private int userId;
+    @ManyToOne
+    private UserPO userPO;
+
     @JoinColumn
     private int rsEventId;
 
     private int voteNum;
     private Date voteTime;
+
 }

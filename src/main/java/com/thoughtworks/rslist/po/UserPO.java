@@ -28,4 +28,7 @@ public class UserPO {
 
     @OneToMany(cascade = CascadeType.REMOVE,mappedBy = "userPO")
     private List<RsEventPO> rsEventPOs;
+
+    @OneToMany(cascade = CascadeType.REMOVE,mappedBy = "userPO")
+    private List<VotePO> votePOs;
 }
