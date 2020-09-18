@@ -45,7 +45,7 @@ public class UserControllerTest {
     public void clear(){
         userRepository.deleteAll();
         rsEventRepository.deleteAll();
-//        voteRepository.deleteAll();
+        voteRepository.deleteAll();
     }
 
     @Test
@@ -158,5 +158,19 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
         assertEquals(0,rsEventRepository.count());
         assertEquals(0,voteRepository.count());
+    }
+
+    @Test
+    @Order(11)
+    public void should_get_all_users() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        UserPO userPO2 = UserPO.builder().voteNum(10).phone("19998888899").name("xiaoming")
+                .age(18).gender("female").email("666@123.com").build();
+        userRepository.save(userPO);
+        userRepository.save(userPO2);
+        mockMvc.perform(get("/user"))
+                .andExpect(status().isOk());
+        assertEquals(2,userRepository.findAll().size());
     }
 }

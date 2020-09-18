@@ -24,7 +24,6 @@ public class UserController {
     @Autowired
     RsEventRepository rsEventRepository;
 
-    List<User> userList=new ArrayList<>();
 
     @PostMapping("/user")
     public ResponseEntity register(@RequestBody @Valid User user){
@@ -41,7 +40,8 @@ public class UserController {
 
     @GetMapping("/user")
     public ResponseEntity getUserList(){
-        return ResponseEntity.ok(userList);
+        List<UserPO> all = userRepository.findAll();
+        return ResponseEntity.ok(all);
     }
 
     @GetMapping("/user/{id}")

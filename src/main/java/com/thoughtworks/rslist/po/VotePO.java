@@ -21,7 +21,6 @@ public class VotePO {
     @ManyToOne
     private UserPO userPO;
 
-    @JoinColumn
     private int rsEventId;
 
     private int voteNum;
