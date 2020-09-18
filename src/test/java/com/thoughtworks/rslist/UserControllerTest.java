@@ -2,6 +2,7 @@ package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
 import com.thoughtworks.rslist.po.VotePO;
@@ -147,8 +148,8 @@ public class UserControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        VotePO votePO=VotePO.builder().voteNum(6).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(votePO);
+        Vote vote=Vote.builder().voteNum(6).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+eventPO.getId()).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(6,rsEventRepository.findById(rsEventId).get().getVote());
