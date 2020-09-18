@@ -1,16 +1,20 @@
 package com.thoughtworks.rslist.po;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name="user")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserPO {
     @Id
     @GeneratedValue
@@ -21,4 +25,10 @@ public class UserPO {
     private String email;
     private String phone;
     private int voteNum=10;
+
+    @OneToMany(cascade = CascadeType.REMOVE,mappedBy = "userPO")
+    private List<RsEventPO> rsEventPOs;
+
+    @OneToMany(cascade = CascadeType.REMOVE,mappedBy = "userPO")
+    private List<VotePO> votePOs;
 }

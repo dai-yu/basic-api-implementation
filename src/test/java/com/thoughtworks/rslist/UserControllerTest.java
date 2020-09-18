@@ -2,8 +2,12 @@ package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
+import com.thoughtworks.rslist.po.VotePO;
+import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
+import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -30,9 +35,17 @@ public class UserControllerTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    RsEventRepository rsEventRepository;
+
+    @Autowired
+    VoteRepository voteRepository;
+
     @AfterEach
     public void clear(){
         userRepository.deleteAll();
+        rsEventRepository.deleteAll();
+        voteRepository.deleteAll();
     }
 
     @Test
@@ -42,14 +55,6 @@ public class UserControllerTest {
         String jsonString=new ObjectMapper().writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-//        mockMvc.perform(get("/user"))
-//                .andExpect(jsonPath("$",hasSize(1)))
-//                .andExpect(jsonPath("$[0].user_name",is("dave")))
-//                .andExpect(jsonPath("$[0].user_gender",is("male")))
-//                .andExpect(jsonPath("$[0].user_age",is(22)))
-//                .andExpect(jsonPath("$[0].user_email",is("abc@123.com")))
-//                .andExpect(jsonPath("$[0].user_phone",is("18888888888")))
-//                .andExpect(status().isOk());
         List<UserPO> all = userRepository.findAll();
         assertEquals(1,all.size());
         assertEquals("dave",all.get(0).getName());
@@ -131,5 +136,41 @@ public class UserControllerTest {
         mockMvc.perform(delete("/user/"+all.get(0).getId()))
                 .andExpect(status().isOk());
         assertEquals(false,userRepository.findById(all.get(0).getId()).isPresent());
+    }
+
+    @Test
+    @Order(10)
+    public void should_delete_user_and_users_all_votes() throws Exception{
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
+        rsEventRepository.save(eventPO);
+        int rsEventId = rsEventRepository.findAll().get(0).getId();
+        VotePO votePO=VotePO.builder().voteNum(6).userPO(userPO).voteTime(new Date(System.currentTimeMillis())).build();
+        String jsonString = new ObjectMapper().writeValueAsString(votePO);
+        mockMvc.perform(post("/rs/vote/"+eventPO.getId()).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        assertEquals(6,rsEventRepository.findById(rsEventId).get().getVote());
+        assertEquals(6,voteRepository.findAll().get(0).getVoteNum());
+        assertEquals(userPO.getId(),voteRepository.findAll().get(0).getUserPO().getId());
+        mockMvc.perform(delete("/user/"+userPO.getId()))
+                .andExpect(status().isOk());
+        assertEquals(0,rsEventRepository.count());
+        assertEquals(0,voteRepository.count());
+    }
+
+    @Test
+    @Order(11)
+    public void should_get_all_users() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        UserPO userPO2 = UserPO.builder().voteNum(10).phone("19998888899").name("xiaoming")
+                .age(18).gender("female").email("666@123.com").build();
+        userRepository.save(userPO);
+        userRepository.save(userPO2);
+        mockMvc.perform(get("/user"))
+                .andExpect(status().isOk());
+        assertEquals(2,userRepository.findAll().size());
     }
 }
