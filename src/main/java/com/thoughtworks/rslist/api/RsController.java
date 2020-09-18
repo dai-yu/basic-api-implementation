@@ -59,11 +59,15 @@ public class RsController {
 
   @GetMapping("/rs/{index}")
   public ResponseEntity oneRsEvent(@PathVariable int index){
-//    if (index<=0 || index>rsList.size()){
-//      throw new RsEventNotVaildException("invalid index");
-//    }
-//    return ResponseEntity.ok(rsList.get(index-1));
-    return ResponseEntity.ok(null);
+    if (index<=0 || index> rsEventRepository.count()){
+      throw new RsEventNotVaildException("invalid index");
+    }
+    RsEventPO rsEventPO = rsEventRepository.findOne(index - 1);
+    RsEvent rsEvent = RsEvent.builder().userId(rsEventPO.getUserPO().getId())
+            .eventName(rsEventPO.getEventName())
+            .keyword(rsEventPO.getKeyWord())
+            .build();
+    return ResponseEntity.ok(rsEvent);
   }
 
   @PostMapping("/rs/event")
@@ -97,7 +101,8 @@ public class RsController {
 
   @DeleteMapping("/rs/{index}")
   public ResponseEntity delete(@PathVariable Integer index){
-//    rsList.remove(index-1);
+    RsEventPO rsEventPO = rsEventRepository.findOne(index - 1);
+    rsEventRepository.deleteById(rsEventPO.getId());
     return ResponseEntity.ok(null);
   }
 
