@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
 @Entity(name = "Vote")
@@ -24,6 +24,7 @@ public class VotePO {
     private int rsEventId;
 
     private int voteNum;
-    private Date voteTime;
+
+    private Timestamp voteTime;
 
 }

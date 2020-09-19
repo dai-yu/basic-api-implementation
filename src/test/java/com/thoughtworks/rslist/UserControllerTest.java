@@ -16,7 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -148,7 +150,7 @@ public class UserControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(6).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        Vote vote=Vote.builder().voteNum(6).userId(userPO.getId()).voteTime(new Timestamp(System.currentTimeMillis())).build();
         String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+eventPO.getId()).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -163,6 +165,20 @@ public class UserControllerTest {
 
     @Test
     @Order(11)
+    public void should_delete_user_and_users_all_rsEvent() throws Exception {
+        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
+                .age(22).gender("male").email("abc@123.com").build();
+        userRepository.save(userPO);
+        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
+        rsEventRepository.save(eventPO);
+        mockMvc.perform(delete("/user/{id}", userPO.getId()))
+                .andExpect(status().isOk());
+        assertEquals(0, userRepository.findAll().size());
+        assertEquals(0, rsEventRepository.findAll().size());
+    }
+
+    @Test
+    @Order(12)
     public void should_get_all_users() throws Exception {
         UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
                 .age(22).gender("male").email("abc@123.com").build();
@@ -174,4 +190,5 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
         assertEquals(2,userRepository.findAll().size());
     }
+
 }
