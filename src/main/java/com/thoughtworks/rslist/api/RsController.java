@@ -117,7 +117,8 @@ public class RsController {
   public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody Vote vote){
     Optional<RsEventPO> rsEventPOOptional = rsEventRepository.findById(rsEventId);
     Optional<UserPO> userPOOptional = userRepository.findById(vote.getUserId());
-    VotePO votePO = VotePO.builder()
+    UserPO userPO=userPOOptional.get();
+    VotePO votePO = VotePO.builder().voteTime(vote.getVoteTime())
             .rsEventId(vote.getRsEventId()).userPO(userPOOptional.get()).voteNum(vote.getVoteNum()).build();
     if (!userPOOptional.isPresent() ||
             !rsEventPOOptional.isPresent() ||
@@ -127,6 +128,8 @@ public class RsController {
     rsEventPOOptional.get().setVote(rsEventPOOptional.get().getVote()+vote.getVoteNum());
     rsEventRepository.save(rsEventPOOptional.get());
     voteRepository.save(votePO);
+    userPO.setVoteNum(userPOOptional.get().getVoteNum()-vote.getVoteNum());
+    userRepository.save(userPO);
     return ResponseEntity.ok().build();
   }
 }

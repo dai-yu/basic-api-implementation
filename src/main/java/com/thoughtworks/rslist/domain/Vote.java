@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
@@ -19,5 +19,6 @@ public class Vote {
     private int rsEventId;
 
     private int voteNum;
-    private Date voteTime;
+
+    private Timestamp voteTime;
 }

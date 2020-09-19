@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -166,15 +166,6 @@ class RsControllerTest {
                 .andExpect(jsonPath("$.error", is("invalid index")));
     }
 
-//    @Test
-//    @Order(12)
-//    public void should_throw_method_argument_not_valid_exception() throws Exception {
-//        RsEvent rsEvent = new RsEvent("dave的热搜", "民生", 1);
-//        String jsonString = new ObjectMapper().writeValueAsString(rsEvent);
-//        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.error", is("invaild param")))
-//                .andExpect(status().isBadRequest());
-//    }
 
     @Test
     @Order(13)
@@ -192,19 +183,6 @@ class RsControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @Order(15)
-    public void should_delete_user_and_users_all_rsEvent() throws Exception {
-        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
-                .age(22).gender("male").email("abc@123.com").build();
-        userRepository.save(userPO);
-        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
-        rsEventRepository.save(eventPO);
-        mockMvc.perform(delete("/user/{id}", userPO.getId()))
-                .andExpect(status().isOk());
-        assertEquals(0, userRepository.findAll().size());
-        assertEquals(0, rsEventRepository.findAll().size());
-    }
 
     @Test
     @Order(16)
@@ -285,13 +263,16 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(5).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        Vote vote=Vote.builder().voteNum(5).userId(userPO.getId()).rsEventId(rsEventId)
+                .voteTime(new Timestamp(System.currentTimeMillis())).build();
         String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
-        assertEquals(5,voteRepository.findAll().get(0).getVoteNum());
-        assertEquals(userPO.getId(),voteRepository.findAll().get(0).getUserPO().getId());
+        assertEquals(5,voteRepository.findByUserPO(userPO).getVoteNum());
+        assertEquals(5,userRepository.findById(userPO.getId()).get().getVoteNum());
+        assertEquals(userPO.getId(),voteRepository.findByUserPO(userPO).getUserPO().getId());
+        assertEquals(vote.getVoteTime(),voteRepository.findByUserPO(userPO).getVoteTime());
     }
 
     @Test
@@ -303,10 +284,11 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(new Date(System.currentTimeMillis())).build();
+        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(new Timestamp(System.currentTimeMillis())).build();
         String jsonString = new ObjectMapper().writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
 
 }
