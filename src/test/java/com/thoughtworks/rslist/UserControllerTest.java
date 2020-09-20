@@ -5,7 +5,6 @@ import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
-import com.thoughtworks.rslist.po.VotePO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
@@ -16,12 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,6 +39,8 @@ public class UserControllerTest {
 
     @Autowired
     VoteRepository voteRepository;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @AfterEach
     public void clear(){
@@ -55,7 +53,7 @@ public class UserControllerTest {
     @Order(1)
     public void should_register_user() throws Exception {
         User user=new User("dave","male",22,"abc@123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         List<UserPO> all = userRepository.findAll();
@@ -68,7 +66,7 @@ public class UserControllerTest {
     @Order(2)
     public void name_should_less_than_8() throws Exception {
         User user=new User("dave123456789","male",22,"abc@123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -76,7 +74,7 @@ public class UserControllerTest {
     @Order(3)
     public void gender_should_not_null() throws Exception {
         User user=new User("dave",null,22,"abc@123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -84,7 +82,7 @@ public class UserControllerTest {
     @Order(4)
     public void age_should_between_18_and_100() throws Exception {
         User user=new User("dave","male",15,"abc@123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -92,7 +90,7 @@ public class UserControllerTest {
     @Order(5)
     public void email_should_suit_format() throws Exception {
         User user=new User("dave","male",22,"abc123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -100,7 +98,7 @@ public class UserControllerTest {
     @Order(6)
     public void phone_should_suit_format() throws Exception {
         User user=new User("dave","male",22,"abc@123.com","18888855588888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -109,7 +107,7 @@ public class UserControllerTest {
     @Order(7)
     public void should_throw_method_argument_not_valid_exception() throws Exception {
         User user=new User("dave","male",15,"abc@123.com","18888888888");
-        String jsonString=new ObjectMapper().writeValueAsString(user);
+        String jsonString=objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error",is("invalid user")))
                 .andExpect(status().isBadRequest());
@@ -150,8 +148,8 @@ public class UserControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(6).userId(userPO.getId()).voteTime(new Timestamp(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(vote);
+        Vote vote=Vote.builder().voteNum(6).userId(userPO.getId()).voteTime(LocalDateTime.now()).build();
+        String jsonString = objectMapper.writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+eventPO.getId()).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(6,rsEventRepository.findById(rsEventId).get().getVote());

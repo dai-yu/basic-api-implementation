@@ -14,14 +14,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,6 +40,9 @@ class RsControllerTest {
 
     @Autowired
     VoteRepository voteRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @AfterEach
     public void clear() {
@@ -264,8 +269,8 @@ class RsControllerTest {
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
         Vote vote=Vote.builder().voteNum(5).userId(userPO.getId()).rsEventId(rsEventId)
-                .voteTime(new Timestamp(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(vote);
+                .voteTime(LocalDateTime.now()).build();
+        String jsonString =objectMapper.writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
@@ -284,8 +289,8 @@ class RsControllerTest {
         RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
         rsEventRepository.save(eventPO);
         int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(new Timestamp(System.currentTimeMillis())).build();
-        String jsonString = new ObjectMapper().writeValueAsString(vote);
+        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(LocalDateTime.now()).build();
+        String jsonString = objectMapper.writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

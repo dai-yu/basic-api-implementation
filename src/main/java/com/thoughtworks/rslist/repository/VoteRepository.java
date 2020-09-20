@@ -5,6 +5,7 @@ import com.thoughtworks.rslist.po.VotePO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface VoteRepository extends CrudRepository<VotePO,Integer> {
@@ -13,6 +14,6 @@ public interface VoteRepository extends CrudRepository<VotePO,Integer> {
 
     VotePO findByUserPO(UserPO userPO);
 
-    @Query(value = "select * from Vote where vote_time between :startTime and :endTime",nativeQuery = true)
-    List<VotePO> findAllByDate(String startTime, String endTime);
+    @Query("select v from Vote v where v.voteTime between :startTime and :endTime")
+    List<VotePO> findAllByDate(LocalDateTime startTime, LocalDateTime endTime);
 }
