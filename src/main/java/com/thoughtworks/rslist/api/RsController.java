@@ -1,7 +1,7 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
-import com.thoughtworks.rslist.exception.RsEventNotVaildException;
+import com.thoughtworks.rslist.exception.RsEventNotValidException;
 import com.thoughtworks.rslist.exception.RsEventNotValidParamException;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
@@ -55,7 +55,7 @@ public class RsController {
   @GetMapping("/rs/{index}")
   public ResponseEntity oneRsEvent(@PathVariable int index){
     if (index<=0 || index> rsEventRepository.count()){
-      throw new RsEventNotVaildException("invalid index");
+      throw new RsEventNotValidException("invalid index");
     }
     RsEventPO rsEventPO = rsEventRepository.findOne(index - 1);
     RsEvent rsEvent = RsEvent.builder().userId(rsEventPO.getUserPO().getId())

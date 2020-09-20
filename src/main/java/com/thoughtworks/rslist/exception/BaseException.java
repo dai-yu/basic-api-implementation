@@ -1,9 +1,9 @@
 package com.thoughtworks.rslist.exception;
 
-public class RsEventNotVaildException extends RuntimeException{
+public class BaseException extends RuntimeException{
     private String message;
 
-    public RsEventNotVaildException(String message) {
+    public BaseException(String message) {
         this.message = message;
     }
 

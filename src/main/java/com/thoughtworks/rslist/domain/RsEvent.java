@@ -2,10 +2,15 @@ package com.thoughtworks.rslist.domain;
 
 import lombok.Builder;
 
+import javax.validation.constraints.NotNull;
+
 @Builder
 public class RsEvent {
+    @NotNull
     private String eventName;
+    @NotNull
     private String keyword;
+    @NotNull
     private int userId;
 
     public RsEvent(String eventName, String keyword, int userId) {

@@ -84,6 +84,7 @@ public class VoteControllerTest {
         Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(LocalDateTime.now()).build();
         String jsonString = objectMapper.writeValueAsString(vote);
         mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error",is("Incorrect number of votes")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -124,5 +125,16 @@ public class VoteControllerTest {
                 .andExpect(jsonPath("$[1].userId",is(userPO.getId())))
                 .andExpect(jsonPath("$[2].voteNum",is(1)));
 
+    }
+
+    @Test
+    @Order(5)
+    public void should_bad_request_when_index_uncorrectly() throws Exception {
+        mockMvc.perform(get("/vote")
+                .param("userId",String.valueOf(userPO.getId()))
+                .param("rsEventId",String.valueOf(rsEventId))
+                .param("pageIndex","0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error",is("invalid index")));
     }
 }
