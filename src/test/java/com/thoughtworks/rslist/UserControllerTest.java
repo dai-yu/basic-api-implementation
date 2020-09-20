@@ -189,4 +189,13 @@ public class UserControllerTest {
         assertEquals(2,userRepository.findAll().size());
     }
 
+    @Test
+    @Order(13)
+    public void should_bad_request_when_id_is_incorrect() throws Exception {
+        User user=new User("dave","male",15,"abc@123.com","18888888888");
+        String jsonString=objectMapper.writeValueAsString(user);
+        mockMvc.perform(get("/user/0").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error",is("UserId is incorrect")))
+                .andExpect(status().isBadRequest());
+    }
 }
