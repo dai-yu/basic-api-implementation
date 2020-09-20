@@ -1,7 +1,6 @@
 package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -14,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -258,42 +256,5 @@ class RsControllerTest {
         assertEquals("新的关键词", rsEventRepository.findAll().get(0).getKeyWord());
         assertEquals(userId, rsEventRepository.findAll().get(0).getUserPO().getId());
     }
-
-    @Test
-    @Order(19)
-    public void should_vote_correctly() throws Exception {
-        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
-                .age(22).gender("male").email("abc@123.com").build();
-        userRepository.save(userPO);
-        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
-        rsEventRepository.save(eventPO);
-        int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(5).userId(userPO.getId()).rsEventId(rsEventId)
-                .voteTime(LocalDateTime.now()).build();
-        String jsonString =objectMapper.writeValueAsString(vote);
-        mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        assertEquals(5,rsEventRepository.findById(rsEventId).get().getVote());
-        assertEquals(5,voteRepository.findByUserPO(userPO).getVoteNum());
-        assertEquals(5,userRepository.findById(userPO.getId()).get().getVoteNum());
-        assertEquals(userPO.getId(),voteRepository.findByUserPO(userPO).getUserPO().getId());
-        assertEquals(vote.getVoteTime(),voteRepository.findByUserPO(userPO).getVoteTime());
-    }
-
-    @Test
-    @Order(19)
-    public void should_bad_request_when_vote_uncorrectly() throws Exception {
-        UserPO userPO = UserPO.builder().voteNum(10).phone("19999999999").name("dave")
-                .age(22).gender("male").email("abc@123.com").build();
-        userRepository.save(userPO);
-        RsEventPO eventPO = RsEventPO.builder().eventName("涨工资了").keyWord("经济").userPO(userPO).build();
-        rsEventRepository.save(eventPO);
-        int rsEventId = rsEventRepository.findAll().get(0).getId();
-        Vote vote=Vote.builder().voteNum(20).userId(userPO.getId()).voteTime(LocalDateTime.now()).build();
-        String jsonString = objectMapper.writeValueAsString(vote);
-        mockMvc.perform(post("/rs/vote/"+rsEventId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
 
 }
