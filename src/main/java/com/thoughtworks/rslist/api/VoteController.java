@@ -55,20 +55,14 @@ public class VoteController {
     @PostMapping("/rs/vote/{rsEventId}")
     public ResponseEntity voteByRsEventId(@PathVariable int rsEventId, @RequestBody @Valid Vote vote){
         Optional<RsEventPO> rsEventPOOptional = rsEventService.findById(rsEventId);
-        Optional<UserPO> userPOOptional = userService.findById(vote.getUserId());
-        UserPO userPO=userPOOptional.get();
+        UserPO userPO = userService.findById(vote.getUserId());
         VotePO votePO = VotePO.builder().voteTime(vote.getVoteTime())
-                .rsEventId(vote.getRsEventId()).userPO(userPOOptional.get()).voteNum(vote.getVoteNum()).build();
-//        if (!userPOOptional.isPresent() ||
-//                !rsEventPOOptional.isPresent() ||
-//                userPOOptional.get().getVoteNum()<vote.getVoteNum()){
-//            throw new VoteNotValidParamException("invalid param");
-//        }
-        if (!userPOOptional.isPresent()) throw new VoteNotValidParamException("User does not exist");
+                .rsEventId(vote.getRsEventId()).userPO(userPO).voteNum(vote.getVoteNum()).build();
+        if (userPO==null) throw new VoteNotValidParamException("User does not exist");
         if (!rsEventPOOptional.isPresent()) throw new VoteNotValidParamException("RsEvent does not exist");
-        if (userPOOptional.get().getVoteNum()<vote.getVoteNum()) throw new VoteNotValidParamException("Incorrect number of votes");
+        if (userPO.getVoteNum()<vote.getVoteNum()) throw new VoteNotValidParamException("Incorrect number of votes");
         rsEventPOOptional.get().setVote(rsEventPOOptional.get().getVote()+vote.getVoteNum());
-        userPO.setVoteNum(userPOOptional.get().getVoteNum()-vote.getVoteNum());
+        userPO.setVoteNum(userPO.getVoteNum()-vote.getVoteNum());
         voteService.voteToRsEvent(rsEventPOOptional.get(),votePO,userPO);
         return ResponseEntity.ok().build();
     }

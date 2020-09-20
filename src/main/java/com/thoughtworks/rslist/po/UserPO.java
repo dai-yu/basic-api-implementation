@@ -24,7 +24,7 @@ public class UserPO {
     private int age;
     private String email;
     private String phone;
-    private int voteNum=10;
+    private int voteNum;
 
     @OneToMany(cascade = CascadeType.REMOVE,mappedBy = "userPO")
     private List<RsEventPO> rsEventPOs;
