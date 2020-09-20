@@ -9,7 +9,6 @@ import com.thoughtworks.rslist.po.VotePO;
 import com.thoughtworks.rslist.service.RsEventService;
 import com.thoughtworks.rslist.service.UserService;
 import com.thoughtworks.rslist.service.VoteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +22,15 @@ import java.util.Optional;
 @RestController
 public class VoteController {
 
-    @Autowired
     UserService userService;
-    @Autowired
     RsEventService rsEventService;
-    @Autowired
     VoteService voteService;
+
+    public VoteController(UserService userService, RsEventService rsEventService, VoteService voteService) {
+        this.userService = userService;
+        this.rsEventService = rsEventService;
+        this.voteService = voteService;
+    }
 
     @GetMapping("/vote")
     public ResponseEntity<List<Vote>> getVotesByDate(@RequestParam(required = false) String startTime,

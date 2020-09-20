@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.po.RsEventPO;
 import com.thoughtworks.rslist.po.UserPO;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -129,7 +130,7 @@ class RsControllerTest {
     public void should_add_rsEvent() throws Exception {
         UserPO userPO = UserPO.builder().name("dave").age(22).email("abc@123.com").gender("male").phone("18888888888").build();
         userRepository.save(userPO);
-        String jsonString = "{\"eventName\":\"猪肉涨价了\",\"keyword\":\"经济\",\"userId\":" + userPO.getId() + "}";
+        String jsonString = objectMapper.writeValueAsString(RsEvent.builder().eventName("猪肉涨价了").keyword("经济").userId(userPO.getId()).build());
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         List<RsEventPO> all = rsEventRepository.findAll();

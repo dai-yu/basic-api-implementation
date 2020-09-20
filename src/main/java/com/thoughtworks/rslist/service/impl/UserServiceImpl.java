@@ -21,6 +21,7 @@ public class UserServiceImpl implements UserService {
         this.rsEventRepository = rsEventRepository;
         this.userRepository = userRepository;
     }
+
     @Override
     public UserPO findById(int userId) {
         return userRepository.findById(userId).get();

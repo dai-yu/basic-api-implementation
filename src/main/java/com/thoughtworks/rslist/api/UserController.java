@@ -3,9 +3,7 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.exception.UserIdIncorrectException;
 import com.thoughtworks.rslist.po.UserPO;
-import com.thoughtworks.rslist.service.RsEventService;
 import com.thoughtworks.rslist.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +13,11 @@ import java.util.List;
 
 @RestController
 public class UserController {
-    @Autowired
     UserService userService;
 
-    @Autowired
-    RsEventService rsEventService;
-
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/user")
     public ResponseEntity register(@RequestBody @Valid User user){
